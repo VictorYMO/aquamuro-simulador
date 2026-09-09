@@ -1,10 +1,8 @@
 import streamlit as st
 import math
 
-# Configuración de la página web
 st.set_page_config(page_title="AquaMuro Simulador", page_icon="💧", layout="wide")
 
-# --- MEMORIA DEL SISTEMA (SESSION STATE) ---
 if 'v_poceta' not in st.session_state:
     st.session_state.v_poceta = 0.0
 if 'v_muro' not in st.session_state:
@@ -19,7 +17,6 @@ if 'agua_excedente' not in st.session_state:
 st.title("💧 Simulador Balance Hídrico - AquaMuro")
 st.markdown("Plataforma web para el cálculo y dimensionamiento del sistema de reutilización de aguas grises.")
 
-# --- INTERFAZ EN DOS COLUMNAS ---
 col_ctrl, col_mon = st.columns([1, 1.2])
 
 with col_ctrl:
@@ -63,6 +60,7 @@ with col_ctrl:
                 st.session_state.v_muro = capacidad_muro
                 
         st.session_state.agua_excedente = excedente
+        st.rerun() # Fuerza la actualización de la interfaz
 
     if st.button("🚽 Simular Descarga de Cisterna", use_container_width=True):
         if st.session_state.v_muro > 0:
@@ -70,6 +68,7 @@ with col_ctrl:
             st.session_state.v_muro -= descargado
             st.session_state.contador_descargas += 1
             st.session_state.vol_total_descargado += descargado
+            st.rerun() # Fuerza la actualización de la interfaz
 
     if st.button("🔄 Limpiar Datos Generales", use_container_width=True):
         st.session_state.v_poceta = 0.0
@@ -82,7 +81,6 @@ with col_ctrl:
 with col_mon:
     st.header("📊 Monitoreo del Sistema")
     
-    # Visualización del Muro
     st.metric(label="Volumen Almacenado en Paneles", 
               value=f"{st.session_state.v_muro:.1f} L", 
               delta=f"Capacidad Máxima: {capacidad_muro:.1f} L", 
@@ -91,7 +89,6 @@ with col_mon:
     porcentaje_muro = min(st.session_state.v_muro / capacidad_muro, 1.0) if capacidad_muro > 0 else 0.0
     st.progress(porcentaje_muro)
     
-    # Análisis de descargas
     descargas_disp = math.floor(st.session_state.v_muro / vol_cisterna)
     st.info(f"**Descargas históricas realizadas:** {st.session_state.contador_descargas} ({st.session_state.vol_total_descargado:.1f} L ahorrados)\n\n"
             f"**Descargas de reserva aproximadas:** {descargas_disp}")
@@ -106,7 +103,6 @@ with col_mon:
 
     st.divider()
     
-    # Visualización de la Poceta
     st.metric(label="Estado de la Poceta (Embalse)", 
               value=f"{st.session_state.v_poceta:.1f} L", 
               delta=f"Límite de Rebose: {cap_poceta:.1f} L", 
